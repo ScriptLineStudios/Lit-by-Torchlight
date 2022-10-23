@@ -1,5 +1,6 @@
 import pygame
 import math
+import pygame_shaders
 
 from scripts.player import Player
 
@@ -9,7 +10,14 @@ class Game:
         self.height = height
 
         pygame.init()
-        self.display = pygame.display.set_mode((self.width, self.height))
+        self.screen = pygame.display.set_mode((self.width, self.height), pygame.OPENGL)
+        self.display = pygame.Surface((self.width, self.height))
+        self.display.set_colorkey((0, 0, 0))
+
+        self.shader = pygame_shaders.Shader(size=(self.width, self.height), display=(self.width, self.height), 
+                        pos=(0, 0), vertex_path="shaders/vertex.glsl", 
+                        fragment_path="shaders/default_frag.glsl", target_texture=self.display)
+
         self.clock = pygame.time.Clock()
 
         self.temp_map = [
@@ -36,19 +44,22 @@ class Game:
 
         self.img = pygame.image.load("test.png")
 
+        self.torch = 7000
+
 
     def main(self):
         pygame.mouse.set_visible(False)
         running = True
         while running:
-            self.display.fill((0, 0, 0))
+            pygame_shaders.clear((0, 0, 0)) #Fill with the color you would like in the background
+            self.display.fill((0, 0, 0)) #Fill with the color you set in the colorkey
 
-            for y, row in enumerate(self.temp_map):
-                for x, col in enumerate(row):
-                    if self.temp_map[y][x] == 1:
-                        pygame.draw.rect(self.display, (255, 255, 255), (x * 32, y * 32, 32, 32))
-                    else: 
-                        pygame.draw.rect(self.display, (100, 100, 100), (x * 32, y * 32, 32, 32))
+            # for y, row in enumerate(self.temp_map):
+            #     for x, col in enumerate(row):
+            #         if self.temp_map[y][x] == 1:
+            #             pygame.draw.rect(self.display, (255, 255, 255), (x * 32, y * 32, 32, 32))
+            #         else: 
+            #             pygame.draw.rect(self.display, (100, 100, 100), (x * 32, y * 32, 32, 32))
 
             self.player.draw(self)
 
@@ -59,11 +70,14 @@ class Game:
 
             keys = pygame.key.get_pressed()
             if keys[pygame.K_w]:
-                self.player.x += math.cos(self.player.angle - self.player.fov)
-                self.player.y += math.sin(self.player.angle - self.player.fov)
+                self.player.x += math.sin(self.player.angle - self.player.fov)
+                self.player.y += math.cos(self.player.angle - self.player.fov)
             if keys[pygame.K_s]:
-                self.player.x -= math.cos(self.player.angle)
-                self.player.y -= math.sin(self.player.angle)
+                self.player.x -= math.cos(self.player.angle - self.player.fov)
+                self.player.y -= math.sin(self.player.angle - self.player.fov)
+
+            if keys[pygame.K_t]:
+                self.torch -= 100
 
             #print(self.player.angle)
 
@@ -74,8 +88,9 @@ class Game:
                 self.player.angle += difference * 0.01
 
 
+            self.shader.render(self.display) #Render the display onto the OpenGL display with the shaders!
+            pygame.display.flip()
             self.clock.tick()
             pygame.display.set_caption(f"{self.clock.get_fps()}")
-            pygame.display.update()
 
 Game(1200, 1000).main()

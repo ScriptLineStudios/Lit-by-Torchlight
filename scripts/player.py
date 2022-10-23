@@ -58,12 +58,12 @@ class Player:
             draw_line = geometry.Line(ray_count, 500 - dist, ray_count, 500 + dist)
 
 
-            offset = int(off) % 16
-            img = game.img.subsurface(offset, 0, 1, 16)
-            img = pygame.transform.scale(img, (1, dist * 2))
+            offset = int(off) % 32
+            img = game.img.subsurface(offset, 0, 1, 32)
+            img = pygame.transform.scale(img, (1, dist*2))
             i = img.copy()
-            color = min(15000 / dist, 255)
-            #i.fill((color, color, color), special_flags=pygame.BLEND_RGB_SUB)
+            color = min(game.torch / dist, 255)
+            i.fill((color, color, color), special_flags=pygame.BLEND_RGB_SUB)
             game.display.blit(i, (draw_line.x1, draw_line.y1))
 
 
@@ -73,4 +73,4 @@ class Player:
 
     def draw(self, game):
         self.raycast(game)
-        pygame.draw.circle(game.display, (255, 0, 0), (self.x, self.y), 10)
+        #pygame.draw.circle(game.display, (255, 0, 0), (self.x, self.y), 10)
