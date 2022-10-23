@@ -23,11 +23,18 @@ class Game:
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ]
-        self.temp_map_data = [[0] * 10] * 9
+        self.collide_indexers = [[0] * len(self.temp_map[0])] * len(self.temp_map)
+        self.colliders = []
+        i = 0
+        for y, row in enumerate(self.temp_map):
+            for x, col in enumerate(row):
+                if self.temp_map[y][x] == 1:
+                    self.colliders.append(pygame.Rect(x * 32, y * 32, 32, 32))
+                    self.collide_indexers[y][x] = pygame.Rect(x * 32, y * 32, 32, 32)
 
         self.player = Player(200, 200)
 
-        self.img = pygame.image.load("wall.png")
+        self.img = pygame.image.load("test.png")
 
 
     def main(self):
@@ -43,7 +50,6 @@ class Game:
                     else: 
                         pygame.draw.rect(self.display, (100, 100, 100), (x * 32, y * 32, 32, 32))
 
-
             self.player.draw(self)
 
             for event in pygame.event.get():
@@ -53,11 +59,11 @@ class Game:
 
             keys = pygame.key.get_pressed()
             if keys[pygame.K_w]:
-                self.player.x -= math.cos(self.player.angle - self.player.fov)
-                self.player.y -= math.sin(self.player.angle - self.player.fov)
-            if keys[pygame.K_s]:
                 self.player.x += math.cos(self.player.angle - self.player.fov)
                 self.player.y += math.sin(self.player.angle - self.player.fov)
+            if keys[pygame.K_s]:
+                self.player.x -= math.cos(self.player.angle)
+                self.player.y -= math.sin(self.player.angle)
 
             #print(self.player.angle)
 
@@ -68,7 +74,7 @@ class Game:
                 self.player.angle += difference * 0.01
 
 
-            self.clock.tick(60)
+            self.clock.tick()
             pygame.display.set_caption(f"{self.clock.get_fps()}")
             pygame.display.update()
 
