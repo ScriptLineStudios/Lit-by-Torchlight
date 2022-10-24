@@ -9,6 +9,8 @@ class Game:
         self.width = width
         self.height = height
 
+        self.global_time = 0
+
         pygame.init()
         self.screen = pygame.display.set_mode((self.width, self.height), pygame.OPENGL)
         self.display = pygame.Surface((self.width, self.height))
@@ -22,12 +24,12 @@ class Game:
 
         self.temp_map = [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ]
@@ -46,11 +48,15 @@ class Game:
 
         self.torch = 7000
 
+        self.enemy = pygame.Rect(128, 128, 32, 32)
+        self.enemy_rects = [self.enemy]
 
+        self.lines_per_enemy = 0
     def main(self):
         pygame.mouse.set_visible(False)
         running = True
         while running:
+            self.global_time += 1
             pygame_shaders.clear((0, 0, 0)) #Fill with the color you would like in the background
             self.display.fill((0, 0, 0)) #Fill with the color you set in the colorkey
 
@@ -69,12 +75,23 @@ class Game:
                     running = False
 
             keys = pygame.key.get_pressed()
+            self.player.moving = False
             if keys[pygame.K_w]:
                 self.player.x += math.sin(self.player.angle - self.player.fov)
                 self.player.y += math.cos(self.player.angle - self.player.fov)
+                self.player.moving = True
             if keys[pygame.K_s]:
-                self.player.x -= math.cos(self.player.angle - self.player.fov)
-                self.player.y -= math.sin(self.player.angle - self.player.fov)
+                self.player.x -= math.sin(self.player.angle - self.player.fov)
+                self.player.y -= math.cos(self.player.angle - self.player.fov)
+                self.player.moving = True
+
+            if keys[pygame.K_a]:
+                self.player.y -= 2
+                self.player.moving = True
+            if keys[pygame.K_d]:
+                self.player.y += 2
+                self.player.moving = True
+
 
             if keys[pygame.K_t]:
                 self.torch -= 100
