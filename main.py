@@ -1,6 +1,7 @@
 import pygame
 import math
 import pygame_shaders
+import random
 
 from scripts.player import Player
 
@@ -24,12 +25,12 @@ class Game:
 
         self.temp_map = [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ]
@@ -48,14 +49,16 @@ class Game:
 
         self.torch = 7000
 
-        self.enemy = pygame.Rect(128, 128, 32, 32)
+        self.enemy = pygame.Rect(128, 128, 8, 8)
         self.enemy_rects = [self.enemy]
 
         self.lines_per_enemy = 0
     def main(self):
+        rand = random.randrange(200, 300) 
         pygame.mouse.set_visible(False)
         running = True
         while running:
+
             self.global_time += 1
             pygame_shaders.clear((0, 0, 0)) #Fill with the color you would like in the background
             self.display.fill((0, 0, 0)) #Fill with the color you set in the colorkey
@@ -74,15 +77,23 @@ class Game:
                     pygame.quit()
                     running = False
 
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 3:
+                        self.player.weapon = self.player.weapon_loaded
+
+                if event.type == pygame.MOUSEBUTTONUP:
+                    if event.button == 3:
+                        self.player.weapon = self.player.weapon_idle
+
             keys = pygame.key.get_pressed()
             self.player.moving = False
             if keys[pygame.K_w]:
-                self.player.x += math.sin(self.player.angle - self.player.fov)
-                self.player.y += math.cos(self.player.angle - self.player.fov)
+                self.player.x += math.sin(self.player.angle - self.player.fov) * ((5 * self.player.sprinting) + 1)
+                self.player.y += math.cos(self.player.angle - self.player.fov) * ((5 * self.player.sprinting)+ 1)
                 self.player.moving = True
             if keys[pygame.K_s]:
-                self.player.x -= math.sin(self.player.angle - self.player.fov)
-                self.player.y -= math.cos(self.player.angle - self.player.fov)
+                self.player.x -= math.sin(self.player.angle - self.player.fov) * ((5 * self.player.sprinting)+ 1)
+                self.player.y -= math.cos(self.player.angle - self.player.fov) * ((5 * self.player.sprinting)+ 1)
                 self.player.moving = True
 
             if keys[pygame.K_a]:
@@ -91,7 +102,8 @@ class Game:
             if keys[pygame.K_d]:
                 self.player.y += 2
                 self.player.moving = True
-
+            if keys[pygame.K_LSHIFT]:
+                self.player.sprinting = True
 
             if keys[pygame.K_t]:
                 self.torch -= 100
@@ -99,12 +111,20 @@ class Game:
             #print(self.player.angle)
 
 
+            #self.player.sprinting = False
+
             if pygame.mouse.get_focused():
                 difference = pygame.mouse.get_pos()[0] - 600
+                differencey = pygame.mouse.get_pos()[1] - 500
+
                 pygame.mouse.set_pos((600, 500))
                 self.player.angle += difference * 0.01
+                self.player.y_off += differencey * 0.01
 
+            if self.global_time % 14 == 0:
+                rand = random.randrange(200, 300)
 
+            self.shader.send("random", [rand])
             self.shader.render(self.display) #Render the display onto the OpenGL display with the shaders!
             pygame.display.flip()
             self.clock.tick()

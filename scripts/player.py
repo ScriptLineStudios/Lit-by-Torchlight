@@ -11,12 +11,21 @@ class Player:
         self.fov = 100
         self.increment_angle = self.fov / (1200 - 1)
 
-        self.weapon = pygame.image.load("assets/images/gun.png").convert()
+        self.weapon_idle = pygame.image.load("assets/images/gun.png").convert()
+        self.weapon_loaded = pygame.image.load("assets/images/gun_loaded.png").convert()
+
+        self.weapon = self.weapon_idle
+
         self.enemy = pygame.image.load("enemy.png").convert()
 
-        self.weapon.set_colorkey((255, 255, 255))
+        self.weapon_idle.set_colorkey((255, 255, 255))
+        self.weapon_loaded.set_colorkey((255, 255, 255))
         
+        self.depths = [0] * 1200
         self.moving = False
+        self.sprinting = False
+
+        self.y_off = 0
 
     def clamp_angle(self, angle):
         new_angle = 0
@@ -29,21 +38,24 @@ class Player:
         return new_angle
 
     def draw_sprites(self, game):
-        dx = 32 + 0.5 - self.x;
-        dy = 32 + 0.5 - self.y;
+        sprite_a = math.atan2(128 - self.y, 128 - self.x)   # why atan2? https://stackoverflow.com/a/12011762
+        
 
-        dist = math.sqrt(dx*dx + dy*dy);
+        sprite_d = ((self.x - 128)**2 + (self.y - 128)**2)**0.5
+        sprite_size = (500/sprite_d) * 70
 
-        spriteAngle = math.atan2(dy, dx) - self.angle;
+        sprite_x = 500 + (sprite_a - self.angle)*500/self.fov + 250 - sprite_size/2
+        sprite_y = 250 - sprite_size/2
 
-        size = 1 / (math.cos(spriteAngle) * dist);
+        sprite_x = int(sprite_x)
+        sprite_y = int(sprite_y)
+        sprite_size = int(sprite_size)
 
-        x = math.tan(spriteAngle) * dist;
+        pygame.draw.circle(game.display, (255, 0, 0), (sprite_x, sprite_y), 32)
 
-        pygame.draw.rect(game.display, (255,0,0), (x, 100,32, 32))
 
     def raycast(self, game):
-        depths = [0] * 1200
+        self.depths = [0] * 1200
         game.temp_map_data = [[0] * 10] * 9
         ray_angle = self.clamp_angle(self.angle)
         game.lines_per_enemy = 0
@@ -71,7 +83,6 @@ class Player:
             if abs((point[0] + 32) - subject_rect.x) < 0.00001:
                 off = point[1]
             final_line = geometry.Line(origin, point)
-            #pygame.draw.line(game.display, (255, 0, 0), final_line.a, final_line.b)
             beta = math.cos(ray_angle - self.angle)
             dist = final_line.length;
 
@@ -84,47 +95,36 @@ class Player:
             img = pygame.transform.scale(img, (1, dist*2))
             i = img.copy()
             color = min(game.torch / dist, 255)
-            #i.fill((color, color, color), special_flags=pygame.BLEND_RGB_SUB)
+            i.fill((color, color, color), special_flags=pygame.BLEND_RGB_SUB)
             game.display.blit(i, (draw_line.x1, draw_line.y1))
-            depths[ray_count] = dist
+            self.depths[ray_count] = dist
 
             point = ray.raycast(game.enemy_rects)
             if point is not None:
                 final_line = geometry.Line(origin, (game.enemy_rects[0].x, game.enemy_rects[0].y))
+
                 dist = final_line.length;
 
                 dist = 15000 / dist
 
                 draw_line = geometry.Line(ray_count, 500 - dist, ray_count, 500 + dist)
 
-                subject_rect = game.collide_indexers[int(point[1] // 32)][int(point[0] // 32)]
-                if abs(point[1] - subject_rect.y) < 0.00001:
-                    off = point[0]
-
-                if (point[1]) - (subject_rect.y - 96) < 0.00001: #i honestly don't know whats going on here but iw works im not complaining
-                    off = point[0]
-
-                if abs(point[0] - subject_rect.x) < 0.00001:
-                    off = point[1]
-
-                if abs((point[0] + 32) - subject_rect.x) < 0.00001:
-                    off = point[1]
-
                 offset = int(game.lines_per_enemy / (dist / 26)) % 32
                 img = self.enemy.subsurface(offset, 0, 1, 32)
                 img = pygame.transform.scale(img, (1, dist*2))
                 i = img.copy()
                 color = min(game.torch / dist, 255)
-                #i.fill((color, color, color), special_flags=pygame.BLEND_RGB_SUB)
-                if game.lines_per_enemy < dist * 1.4 and dist > depths[ray_count] and dist < 300:
+                i.fill((color, color, color), special_flags=pygame.BLEND_RGB_SUB)
+                if game.lines_per_enemy < dist * 1.4 and dist > self.depths[ray_count] and dist < 300:
                     game.display.blit(i, (draw_line.x1, draw_line.y1))
+
+
                 game.lines_per_enemy += 1
-
-
 
             ray_angle += self.increment_angle / self.fov
 
     def draw(self, game):
         self.raycast(game)
+       # self.draw_sprites(game)
         game.display.blit(pygame.transform.scale(self.weapon, (800, 800)), (300, 300+(math.sin(game.global_time / 10)*10) * int(self.moving)))
         #pygame.draw.circle(game.display, (255, 0, 0), (self.x, self.y), 10)
