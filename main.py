@@ -4,6 +4,7 @@ import pygame_shaders
 import random
 
 from scripts.player import Player
+from scripts.enemy import Enemy
 
 class Game:
     def __init__(self, width, height):
@@ -13,13 +14,13 @@ class Game:
         self.global_time = 0
 
         pygame.init()
-        self.screen = pygame.display.set_mode((self.width, self.height), pygame.OPENGL)
-        self.display = pygame.Surface((self.width, self.height))
-        self.display.set_colorkey((0, 0, 0))
+        self.display = pygame.display.set_mode((self.width, self.height))
+        #self.display = pygame.Surface((self.width, self.height))
+        #self.display.set_colorkey((0, 0, 0))
 
-        self.shader = pygame_shaders.Shader(size=(self.width, self.height), display=(self.width, self.height), 
-                        pos=(0, 0), vertex_path="shaders/vertex.glsl", 
-                        fragment_path="shaders/default_frag.glsl", target_texture=self.display)
+        #self.shader = pygame_shaders.Shader(size=(self.width, self.height), display=(self.width, self.height), 
+       #                 pos=(0, 0), vertex_path="shaders/vertex.glsl", 
+       #                 fragment_path="shaders/default_frag.glsl", target_texture=self.display)
 
         self.clock = pygame.time.Clock()
 
@@ -27,13 +28,25 @@ class Game:
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ]
+
         self.collide_indexers = [[0] * len(self.temp_map[0])] * len(self.temp_map)
         self.colliders = []
         i = 0
@@ -44,23 +57,27 @@ class Game:
                     self.collide_indexers[y][x] = pygame.Rect(x * 32, y * 32, 32, 32)
 
         self.player = Player(200, 200)
-
-        self.img = pygame.image.load("test.png")
-
+        self.img = pygame.image.load("assets/images/wall.png").convert()
         self.torch = 7000
+        self.enemy = Enemy(128, 128)
+        self.enemy2 = Enemy(200, 128)
+        self.enemy3 = Enemy(90, 128)
+        self.enemy_rects = [self.enemy, self.enemy2, self.enemy]
+        pygame.mixer.music.load("assets/sounds/distrub.mp4")
+        #images
+        self.floor = pygame.image.load("assets/images/floor.png").convert()
 
-        self.enemy = pygame.Rect(128, 128, 8, 8)
-        self.enemy_rects = [self.enemy]
-
-        self.lines_per_enemy = 0
+        self.firing = False
+        self.shot = 0
     def main(self):
         rand = random.randrange(200, 300) 
         pygame.mouse.set_visible(False)
+        forward = True
         running = True
         while running:
 
             self.global_time += 1
-            pygame_shaders.clear((0, 0, 0)) #Fill with the color you would like in the background
+            #pygame_shaders.clear((0, 0, 0)) #Fill with the color you would like in the background
             self.display.fill((0, 0, 0)) #Fill with the color you set in the colorkey
 
             # for y, row in enumerate(self.temp_map):
@@ -69,7 +86,6 @@ class Game:
             #             pygame.draw.rect(self.display, (255, 255, 255), (x * 32, y * 32, 32, 32))
             #         else: 
             #             pygame.draw.rect(self.display, (100, 100, 100), (x * 32, y * 32, 32, 32))
-
             self.player.draw(self)
 
             for event in pygame.event.get():
@@ -78,30 +94,59 @@ class Game:
                     running = False
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        if self.player.weapon == self.player.weapon_loaded:
+                            self.firing = True
+
+                    
                     if event.button == 3:
                         self.player.weapon = self.player.weapon_loaded
 
                 if event.type == pygame.MOUSEBUTTONUP:
+                    if event.button == 1:
+                        self.firing = False
+                        self.shot = 0
                     if event.button == 3:
                         self.player.weapon = self.player.weapon_idle
 
+
+            if self.firing:
+                if self.shot <= 0:
+                    self.player.shooting = 1
+                    self.firing = True
+                    for i in range(1):
+                        self.player.camera[0] += random.random() / 40
+                        self.player.camera[1] += random.random() / 40
+                    self.shot = 5
+                else:
+                    self.shot -= 1
+
             keys = pygame.key.get_pressed()
+            self.player.movement = [0, 0]
             self.player.moving = False
             if keys[pygame.K_w]:
+                forward = True
                 self.player.x += math.sin(self.player.angle - self.player.fov) * ((5 * self.player.sprinting) + 1)
                 self.player.y += math.cos(self.player.angle - self.player.fov) * ((5 * self.player.sprinting)+ 1)
                 self.player.moving = True
             if keys[pygame.K_s]:
+                forward = False
                 self.player.x -= math.sin(self.player.angle - self.player.fov) * ((5 * self.player.sprinting)+ 1)
                 self.player.y -= math.cos(self.player.angle - self.player.fov) * ((5 * self.player.sprinting)+ 1)
                 self.player.moving = True
 
-            if keys[pygame.K_a]:
-                self.player.y -= 2
-                self.player.moving = True
-            if keys[pygame.K_d]:
-                self.player.y += 2
-                self.player.moving = True
+            col = int(self.player.x // 32)
+            row = int(self.player.y // 32)
+            # player hits the wall (collision detection)
+            if self.temp_map[row][col] == 1:
+                if forward:
+                    self.player.x -= math.sin(self.player.angle - self.player.fov) * 5
+                    self.player.y -= math.cos(self.player.angle - self.player.fov) * 5
+                else:
+                    self.player.x += math.sin(self.player.angle - self.player.fov) * 5
+                    self.player.y += math.cos(self.player.angle - self.player.fov) * 5
+
+
             if keys[pygame.K_LSHIFT]:
                 self.player.sprinting = True
 
@@ -122,12 +167,12 @@ class Game:
                 self.player.y_off += differencey * 0.01
 
             if self.global_time % 14 == 0:
-                rand = random.randrange(200, 300)
+                rand = random.randrange(300, 301)
 
-            self.shader.send("random", [rand])
-            self.shader.render(self.display) #Render the display onto the OpenGL display with the shaders!
+            #self.shader.send("random", [rand])
+            #self.shader.render(self.display) #Render the display onto the OpenGL display with the shaders!
             pygame.display.flip()
-            self.clock.tick()
+            self.clock.tick(30)
             pygame.display.set_caption(f"{self.clock.get_fps()}")
 
-Game(1200, 1000).main()
+Game(1200, 800).main()
