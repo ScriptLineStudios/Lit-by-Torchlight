@@ -36,7 +36,8 @@ class Player:
 
         self.shooting = 0
 
-        self.lines_per_enemy = [0, 0, 0]
+        self.lines_per_enemy = [0] * 1000
+
         self.rect = pygame.Rect(self.x, self.y, 16, 16)
         self.movement = [0, 0]
         self.camera = [1, 1]
@@ -103,10 +104,10 @@ class Player:
 
         draw_line = geometry.Line(ray_count, 500 - dist, ray_count, 500 + dist)
         offset = int(off) % 32
-        img = game.img.subsurface(offset, 0, 1, 32)
+        img = game.imgs[int(point[1] // 32)][int(point[0] // 32)].subsurface(offset, 0, 1, 32)
         img = pygame.transform.scale(img, (1, dist*2))
         i = img.copy()
-        color = min(game.torch / dist, 255)
+        color = min(10000 / dist, 255)
         i.fill((color, color, color), special_flags=pygame.BLEND_RGB_SUB)
         game.display.blit(i, (draw_line.x1 * self.camera[0], draw_line.y1 * self.camera[1]))
 
@@ -119,6 +120,8 @@ class Player:
         # #pygame.draw.line(game.display, (color, color, color), ceiling_line.a, ceiling_line.b)
 
         self.depths[ray_count] = dist
+
+
         
         for index, enemy in enumerate(game.enemy_rects):
             point = ray.raycast([enemy.rect]) 
@@ -133,8 +136,36 @@ class Player:
 
                 offset = int(self.lines_per_enemy[index] / (dist / 32)) % 32
                 enemy.animate(game)
-                print(enemy.rect.x)
-                img = enemy.images[enemy.animation_index // 300].subsurface(offset, 0, 1, 32)
+                img = enemy.image[enemy.animation_index // 300].subsurface(offset, 0, 1, 32)
+                if game.player.shooting > 0:
+                    if ray_count > 400 and ray_count < 650:
+                        img = enemy.enemy_hit.subsurface(offset, 0, 1, 32)
+                        if enemy.health > 0:
+                            enemy.health -= 1
+                            game.click.play()
+                
+                img = pygame.transform.scale(img, (1, dist*2))
+                i = img.copy()
+                color = min(game.torch / dist, 255)
+                i.fill((color, color, color), special_flags=pygame.BLEND_RGB_SUB)
+                if self.lines_per_enemy[index] < dist * 1.4 and dist > self.depths[ray_count] and dist < 300:
+                    game.display.blit(i, (draw_line.x1 * self.camera[0], draw_line.y1 * self.camera[1]))
+
+                self.lines_per_enemy[index] += 1
+
+        for index, bullet in enumerate(game.bullets):
+            point = ray.raycast([bullet.rect]) 
+            if point is not None:
+                final_line = geometry.Line(origin, (bullet.rect.x, bullet.rect.y))
+
+                dist = final_line.length;
+
+                dist = 15000 / dist
+
+                draw_line = geometry.Line(ray_count, 500 - dist, ray_count, 500 + dist)
+
+                offset = int(self.lines_per_enemy[index] / (dist / 32)) % 32
+                img = game.bullet.subsurface(offset, 0, 1, 32)
                 img = pygame.transform.scale(img, (1, dist*2))
                 i = img.copy()
                 color = min(game.torch / dist, 255)
@@ -146,12 +177,12 @@ class Player:
 
     def raycast(self, game):
         self.depths = [0] * 1200
-        game.temp_map_data = [[0] * 10] * 9
+        game.map1_data = [[0] * 10] * 9
         ray_angle = self.clamp_angle(self.angle)
-        self.lines_per_enemy = [0, 0, 0]
+        self.lines_per_enemy = [0] * 1000
         for ray_count in range(1200):
-            dx = self.x + math.sin(ray_angle) * 600
-            dy = self.y + math.cos(ray_angle) * 600
+            dx = self.x + math.sin(ray_angle) * 1000
+            dy = self.y + math.cos(ray_angle) * 1000
 
             self.ray(game, ray_angle, ray_count, dx, dy)
 
@@ -159,9 +190,9 @@ class Player:
 
     def get_colliding_tiles(self, game):
         self.tiles = []
-        for y, row in enumerate(game.temp_map):
+        for y, row in enumerate(game.map1):
             for x, col in enumerate(row):
-                if game.temp_map[y][x] == 1:
+                if game.map1[y][x] == 1:
                     tile_rect = pygame.Rect(x * 32, y * 32, 32, 32)
                     if tile_rect.colliderect(self.rect):
                         self.tiles.append(tile_rect)
@@ -188,7 +219,13 @@ class Player:
     def draw(self, game):
         for enemy in game.enemy_rects:
             enemy.do(game)
-
+            if enemy.dead:
+                game.enemy_rects.remove(enemy)
+        for bullet in game.bullets:
+            if bullet.lifetime >= 0:
+                bullet.do(game)
+            else:
+                game.bullets.remove(bullet)
         self.raycast(game)
         # self.draw_sprites(game)
 

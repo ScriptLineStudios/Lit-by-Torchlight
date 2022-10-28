@@ -4,6 +4,7 @@ import pygame_shaders
 import random
 
 from scripts.player import Player
+from scripts.bullet import Bullet
 from scripts.enemy import Enemy
 
 class Game:
@@ -24,48 +25,70 @@ class Game:
 
         self.clock = pygame.time.Clock()
 
-        self.temp_map = [
+        self.map1 = [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+            [1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1],
+            [1, 1, 1, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+            [1, 0, 9, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 0, 9, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ]
-
-        self.collide_indexers = [[0] * len(self.temp_map[0])] * len(self.temp_map)
-        self.colliders = []
-        i = 0
-        for y, row in enumerate(self.temp_map):
-            for x, col in enumerate(row):
-                if self.temp_map[y][x] == 1:
-                    self.colliders.append(pygame.Rect(x * 32, y * 32, 32, 32))
-                    self.collide_indexers[y][x] = pygame.Rect(x * 32, y * 32, 32, 32)
-
-        self.player = Player(200, 200)
-        self.img = pygame.image.load("assets/images/wall.png").convert()
-        self.torch = 7000
         self.enemy = Enemy(128, 128)
         self.enemy2 = Enemy(200, 128)
-        self.enemy3 = Enemy(90, 128)
-        self.enemy_rects = [self.enemy, self.enemy2, self.enemy]
-        pygame.mixer.music.load("assets/sounds/distrub.mp4")
+        self.enemy_rects = []
+        self.collide_indexers = [[0] * len(self.map1[0])] * len(self.map1)
+        self.imgs = [[0] * len(self.map1[0])] * len(self.map1)
+        self.img = pygame.image.load("assets/images/wall.png").convert()
+        self.img_painting = pygame.image.load("assets/images/wall_painting1.png").convert()
+
+        self.colliders = []
+
+        i = 0
+        for y, row in enumerate(self.map1):
+            for x, col in enumerate(row):
+                if self.map1[y][x] == 1:
+                    self.colliders.append(pygame.Rect(x * 32, y * 32, 32, 32))
+                    self.collide_indexers[y][x] = pygame.Rect(x * 32, y * 32, 32, 32)
+                    self.imgs[y][x] = self.img
+
+                if self.map1[y][x] == 9:
+                    self.enemy_rects.append(Enemy(x * 32, y * 32))
+                    self.map1[y][x] = 0
+
+        self.player = Player(128, 128)
+        self.torch = 100000
+
+        pygame.mixer.music.set_volume(3)
+        pygame.mixer.music.load("assets/sounds/disturb.ogg")
+        pygame.mixer.music.play(-1)
+
+        self.shot_sound = pygame.mixer.Sound("assets/sounds/shot.wav")
+        self.click = pygame.mixer.Sound("assets/sounds/click.wav")
+        self.footstep1 = pygame.mixer.Sound("assets/sounds/footstep1.wav")
+        self.footstep2 = pygame.mixer.Sound("assets/sounds/footsetp2.wav")
+
+
+        self.click.set_volume(0.05)
+
         #images
         self.floor = pygame.image.load("assets/images/floor.png").convert()
+        self.bullet = pygame.image.load("bullet.png").convert_alpha()
+
+        self.bullets = []
 
         self.firing = False
         self.shot = 0
@@ -80,9 +103,9 @@ class Game:
             #pygame_shaders.clear((0, 0, 0)) #Fill with the color you would like in the background
             self.display.fill((0, 0, 0)) #Fill with the color you set in the colorkey
 
-            # for y, row in enumerate(self.temp_map):
+            # for y, row in enumerate(self.map1):
             #     for x, col in enumerate(row):
-            #         if self.temp_map[y][x] == 1:
+            #         if self.map1[y][x] == 1:
             #             pygame.draw.rect(self.display, (255, 255, 255), (x * 32, y * 32, 32, 32))
             #         else: 
             #             pygame.draw.rect(self.display, (100, 100, 100), (x * 32, y * 32, 32, 32))
@@ -112,6 +135,7 @@ class Game:
 
             if self.firing:
                 if self.shot <= 0:
+                    self.shot_sound.play()
                     self.player.shooting = 1
                     self.firing = True
                     for i in range(1):
@@ -126,19 +150,19 @@ class Game:
             self.player.moving = False
             if keys[pygame.K_w]:
                 forward = True
-                self.player.x += math.sin(self.player.angle - self.player.fov) * ((5 * self.player.sprinting) + 1)
-                self.player.y += math.cos(self.player.angle - self.player.fov) * ((5 * self.player.sprinting)+ 1)
+                self.player.x += math.sin(self.player.angle - self.player.fov) * ((7 * self.player.sprinting) + 1)
+                self.player.y += math.cos(self.player.angle - self.player.fov) * ((7 * self.player.sprinting)+ 1)
                 self.player.moving = True
             if keys[pygame.K_s]:
                 forward = False
-                self.player.x -= math.sin(self.player.angle - self.player.fov) * ((5 * self.player.sprinting)+ 1)
-                self.player.y -= math.cos(self.player.angle - self.player.fov) * ((5 * self.player.sprinting)+ 1)
+                self.player.x -= math.sin(self.player.angle - self.player.fov) * ((7 * self.player.sprinting)+ 1)
+                self.player.y -= math.cos(self.player.angle - self.player.fov) * ((7 * self.player.sprinting)+ 1)
                 self.player.moving = True
 
             col = int(self.player.x // 32)
             row = int(self.player.y // 32)
             # player hits the wall (collision detection)
-            if self.temp_map[row][col] == 1:
+            if self.map1[row][col] == 1:
                 if forward:
                     self.player.x -= math.sin(self.player.angle - self.player.fov) * 5
                     self.player.y -= math.cos(self.player.angle - self.player.fov) * 5
