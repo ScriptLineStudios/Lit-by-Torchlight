@@ -6,22 +6,22 @@ from scripts.bullet import Bullet
 
 class Enemy:
     def __init__(self, x, y):
-        self.images = [pygame.image.load("enemy1.png"),
-            pygame.image.load("enemy2.png"), pygame.image.load("enemy3.png"), pygame.image.load("enemy4.png"),
-            pygame.image.load("enemy5.png"), pygame.image.load("enemy6.png"), pygame.image.load("enemy7.png"),
-            pygame.image.load("enemy8.png"), pygame.image.load("enemy9.png"), pygame.image.load("enemy10.png"),
-            pygame.image.load("enemy11.png"), pygame.image.load("enemy12.png")]
+        self.images = [pygame.image.load("assets/images/enemy1.png"),
+            pygame.image.load("assets/images/enemy2.png"), pygame.image.load("assets/images/enemy3.png"), pygame.image.load("assets/images/enemy4.png"),
+            pygame.image.load("assets/images/enemy5.png"), pygame.image.load("assets/images/enemy6.png"), pygame.image.load("assets/images/enemy7.png"),
+            pygame.image.load("assets/images/enemy8.png"), pygame.image.load("assets/images/enemy9.png"), pygame.image.load("assets/images/enemy10.png"),
+            pygame.image.load("assets/images/enemy11.png"), pygame.image.load("assets/images/enemy12.png")]
 
-        self.death_images = [pygame.image.load("enemy_death1.png"),
-            pygame.image.load("enemy_death2.png"), pygame.image.load("enemy_death3.png"), pygame.image.load("enemy_death4.png"),
-            pygame.image.load("enemy_death5.png"), pygame.image.load("enemy_death6.png"), pygame.image.load("enemy_death7.png"),
-            pygame.image.load("enemy_death8.png"), pygame.image.load("enemy_death9.png"), pygame.image.load("enemy_death10.png"),
-            pygame.image.load("enemy_death11.png"), pygame.image.load("enemy_death12.png")]
+        self.death_images = [pygame.image.load("assets/images/enemy_death1.png"),
+            pygame.image.load("assets/images/enemy_death2.png"), pygame.image.load("assets/images/enemy_death3.png"), pygame.image.load("assets/images/enemy_death4.png"),
+            pygame.image.load("assets/images/enemy_death5.png"), pygame.image.load("assets/images/enemy_death6.png"), pygame.image.load("assets/images/enemy_death7.png"),
+            pygame.image.load("assets/images/enemy_death8.png"), pygame.image.load("assets/images/enemy_death9.png"), pygame.image.load("assets/images/enemy_death10.png"),
+            pygame.image.load("assets/images/enemy_death11.png"), pygame.image.load("assets/images/enemy_death12.png")]
 
         self.health = 1200 * 2
         self.dead = False
 
-        self.enemy_hit = pygame.image.load("enemy_hit.png").convert()
+        self.enemy_hit = pygame.image.load("assets/images/enemy_hit.png").convert()
 
         self.image = self.images
         

@@ -23,7 +23,7 @@ class Player:
 
         self.weapon = self.weapon_idle
 
-        self.enemy = pygame.image.load("enemy.png").convert()
+        self.enemy = pygame.image.load("assets/images/enemy.png").convert()
 
         self.weapon_idle.set_colorkey((255, 255, 255))
         self.weapon_loaded.set_colorkey((255, 255, 255))

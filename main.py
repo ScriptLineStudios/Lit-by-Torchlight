@@ -16,6 +16,8 @@ class Game:
 
         pygame.init()
         self.display = pygame.display.set_mode((self.width, self.height))
+        pygame.display.set_caption(f"LIT BY TORCHLIGHT")
+
         #self.display = pygame.Surface((self.width, self.height))
         #self.display.set_colorkey((0, 0, 0))
 
@@ -97,7 +99,7 @@ class Game:
 
         #images
         self.floor = pygame.image.load("assets/images/floor.png").convert()
-        self.bullet = pygame.image.load("bullet.png").convert_alpha()
+        self.bullet = pygame.image.load("assets/images/bullet.png").convert_alpha()
 
         self.bullets = []
 
@@ -223,6 +225,5 @@ class Game:
             #self.shader.render(self.display) #Render the display onto the OpenGL display with the shaders!
             pygame.display.flip()
             self.clock.tick(30)
-            pygame.display.set_caption(f"{self.clock.get_fps()}")
 
 Game(1200, 800).main()
