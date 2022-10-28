@@ -85,6 +85,7 @@ class Player:
 
         off = 0
         subject_rect = game.collide_indexers[int(point[1] // 32)][int(point[0] // 32)]
+        _ = game.imgs[int(point[1] // 32)][int(point[0] // 32)]
         if abs(point[1] - subject_rect.y) < 0.00001:
             off = point[0]
 
@@ -104,7 +105,7 @@ class Player:
 
         draw_line = geometry.Line(ray_count, 500 - dist, ray_count, 500 + dist)
         offset = int(off) % 32
-        img = game.imgs[int(point[1] // 32)][int(point[0] // 32)].subsurface(offset, 0, 1, 32)
+        img = _.subsurface(offset, 0, 1, 32)
         img = pygame.transform.scale(img, (1, dist*2))
         i = img.copy()
         color = min(10000 / dist, 255)
@@ -120,6 +121,8 @@ class Player:
         # #pygame.draw.line(game.display, (color, color, color), ceiling_line.a, ceiling_line.b)
 
         self.depths[ray_count] = dist
+
+
 
 
         

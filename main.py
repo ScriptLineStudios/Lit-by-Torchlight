@@ -28,8 +28,8 @@ class Game:
         self.map1 = [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 1],
+            [1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 9, 0, 0, 1, 0, 0, 0, 0, 1],
             [1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1],
             [1, 1, 1, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
@@ -39,23 +39,30 @@ class Game:
             [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 1, 0, 0, 9, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 9, 0, 0, 0, 1, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 9, 0, 0, 0, 0, 0, 9, 1],
+            [1, 0, 0, 0, 9, 1, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ]
+        self.enemy_kills = 0
         self.enemy = Enemy(128, 128)
         self.enemy2 = Enemy(200, 128)
         self.enemy_rects = []
         self.collide_indexers = [[0] * len(self.map1[0])] * len(self.map1)
         self.imgs = [[0] * len(self.map1[0])] * len(self.map1)
         self.img = pygame.image.load("assets/images/wall.png").convert()
-        self.img_painting = pygame.image.load("assets/images/wall_painting1.png").convert()
-
+        self.img_painting = pygame.image.load("assets/images/door.png").convert()
+        self.game_over = False
         self.colliders = []
+        self.door = []
+        self.door_indexes = [[0] * len(self.map1[0])] * len(self.map1)
+
+
+        self.font = pygame.font.Font("assets/font.ttf", 32)
+        self.text = self.font.render("Goal: Kill all enemies", False, (255, 255, 255))
 
         i = 0
         for y, row in enumerate(self.map1):
@@ -64,6 +71,10 @@ class Game:
                     self.colliders.append(pygame.Rect(x * 32, y * 32, 32, 32))
                     self.collide_indexers[y][x] = pygame.Rect(x * 32, y * 32, 32, 32)
                     self.imgs[y][x] = self.img
+                if self.map1[y][x] == 2:
+                    self.door.append(pygame.Rect(x * 32, y * 32, 32, 32))
+                    self.door_indexes[y][x] = pygame.Rect(x * 32, y * 32, 16, 16)
+                    
 
                 if self.map1[y][x] == 9:
                     self.enemy_rects.append(Enemy(x * 32, y * 32))
@@ -159,6 +170,10 @@ class Game:
                 self.player.y -= math.cos(self.player.angle - self.player.fov) * ((7 * self.player.sprinting)+ 1)
                 self.player.moving = True
 
+            if keys[pygame.K_SPACE] and self.game_over:
+                Game(1200, 800).main()
+
+
             col = int(self.player.x // 32)
             row = int(self.player.y // 32)
             # player hits the wall (collision detection)
@@ -169,10 +184,6 @@ class Game:
                 else:
                     self.player.x += math.sin(self.player.angle - self.player.fov) * 5
                     self.player.y += math.cos(self.player.angle - self.player.fov) * 5
-
-
-            if keys[pygame.K_LSHIFT]:
-                self.player.sprinting = True
 
             if keys[pygame.K_t]:
                 self.torch -= 100
@@ -192,6 +203,21 @@ class Game:
 
             if self.global_time % 14 == 0:
                 rand = random.randrange(300, 301)
+
+            if self.global_time < 100:
+                self.display.blit(self.text, (400, 10))
+
+            if self.enemy_kills == 1:
+                self.game_over = self.font.render("CONGRATS! YOU HAVE WON!", False, (255, 255, 255))
+                self.display.blit(self.game_over, (300, 400))
+
+            if self.game_over:
+                if self.enemy_kills != 10:
+                    
+                    self.player.camera[0] += random.random() / 40
+                    self.player.camera[1] += random.random() / 40
+                    self.game_over = self.font.render("GAME OVER! PRESS SPACE TO RESTART", False, (255, 255, 255))
+                    self.display.blit(self.game_over, (150, 400))
 
             #self.shader.send("random", [rand])
             #self.shader.render(self.display) #Render the display onto the OpenGL display with the shaders!

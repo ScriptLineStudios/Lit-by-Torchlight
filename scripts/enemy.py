@@ -46,5 +46,6 @@ class Enemy:
         if (self.animation_index + 1 >= len(self.image) * 300):
             self.animation_index = 0;
             if self.health <= 0:
+                game.enemy_kills += 1
                 self.dead = True
         self.animation_index += 1;
