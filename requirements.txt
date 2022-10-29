@@ -1,0 +1,3 @@
+geometry @ git+https://github.com/novialriptide/pygame_geometry
+pygame==2.1.3.dev5
+pygame_shaders==1.0.8
