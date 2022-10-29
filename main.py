@@ -209,7 +209,7 @@ class Game:
             if self.global_time < 100:
                 self.display.blit(self.text, (400, 10))
 
-            if self.enemy_kills == 1:
+            if self.enemy_kills == 10:
                 self.game_over = self.font.render("CONGRATS! YOU HAVE WON!", False, (255, 255, 255))
                 self.display.blit(self.game_over, (300, 400))
 
